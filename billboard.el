@@ -1,20 +1,21 @@
 (defvar *announcements* nil
   "The main store for all announcemnets.")
 
-(defun make-announcement (ti co dl de no)
+(defun make-announcement (ti co dl de no pr)
   "Create an announcemnet alist"
   (list (cons 'contact co)
 	(cons 'title ti)
 	(cons 'deadline dl)
 	(cons 'description de)
-	(cons 'notes no)))
+	(cons 'notes no)
+	(cons 'priority pr)))
 
 (defun add-announcement (announcement) (push announcement *announcements*))
 
-(defun prompt-new-announcemnt (ti co dl de no)
+(defun prompt-new-announcemnt (ti co dl de no pr)
   "Interactively get the values for a new announcement and add to db."
-  (interactive "MTitle: \nMContact: \nMDealine: \nMDescription: \nMNotes: ")
-  (add-announcement (make-announcement ti co dl de no)))
+  (interactive "MTitle: \nMContact: \nMDealine: \nMDescription: \nMNotes: \nMPriority: ")
+  (add-announcement (make-announcement ti co dl de no pr)))
 
 (defun find-by-contact (contact)
   (let (results)
@@ -22,7 +23,8 @@
       (if (equal contact (cdr (assoc 'contact annoucement)))
 	  (push annoucement results)))))
 
-(find-by-contact "Allen Hughes")
+
+;; For testing 
 
 ;; (((contact . "Allen Hughes")
 ;;   (title . "Another thing")
