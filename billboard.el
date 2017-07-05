@@ -18,6 +18,7 @@
   (add-announcement (make-announcement ti co dl de no pr)))
 
 (defun find-by-contact (contact)
+  "Finds all records that have the value of contact in its 'contact association"
   (let (results)
     (dolist (annoucement *announcements* results)
       (if (equal contact (cdr (assoc 'contact annoucement)))
@@ -25,6 +26,8 @@
 
 
 ;; For testing 
+(defun clear-vars ()
+  (makunbound '*announcements*))
 
 ;; (((contact . "Allen Hughes")
 ;;   (title . "Another thing")
