@@ -25,9 +25,42 @@
 	  (push annoucement results)))))
 
 
+(defun build-spaces (num)
+  (cond
+   ((= 0 num) "")
+   (t (concat " " (build-spaces (- num 1))))))
+
+(defun center-header-line-text (str)
+  (let ((line-length (window-width))
+	(str-length (length str)))
+    (concat (build-spaces (- (/ line-length 2) (/ str-length 2)))
+	    str)))
+
+;; Create Announcment list buffer
+(defun create-billboard-buffer (buffer)
+  (save-current-buffer
+    (set-buffer (get-buffer-create buffer))
+    (set-billboard-header-line)
+    (set-billboard-major-mode)
+    (insert "This is a line of text in this buffer"))
+  (switch-to-buffer buffer))
+
+(defun set-billboard-header-line ()
+  (setf header-line-format
+	(center-header-line-text
+	 (concat (propertize "Billboard: " 'face 'success)
+		 (propertize "Keep track of Brushy Creek announcmnets" 'face 'success)))))
+		
+(defun set-billboard-major-mode ()
+  ())
+
+
 ;; For testing 
 (defun clear-vars ()
   (makunbound '*announcements*))
+
+
+
 
 ;; (((contact . "Allen Hughes")
 ;;   (title . "Another thing")
@@ -40,12 +73,4 @@
 ;;   (description . "What is says")
 ;;   (notes . "noNotes")))
 
-;; (makunbound '*announcements*)
-
-;; (setq *test-db*
-;;       (list
-;; 	(cons 'contact (list (cons "Allen Hughes" (list "864-640-0788" "arh62090@gmail.com"))))
-;; 	(cons 'title "Wedding Shower")))
-
-;; (cdr (car (cdr (assoc 'contact *test-db*))))
 
