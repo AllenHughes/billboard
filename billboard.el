@@ -21,7 +21,7 @@
   "Finds all records that have the value of contact in its 'contact association"
   (let (results)
     (dolist (annoucement *announcements* results)
-      (if (equal contact (cdr (assoc 'contact annoucement)))
+      (if (equal? contact (cdr (assoc 'contact annoucement)))
 	  (push annoucement results)))))
 
 
@@ -37,11 +37,11 @@
 	    str)))
 
 ;; Create Announcment list buffer
-(defun create-billboard-buffer (buffer)
+(defun create-billboard-list-buffer (buffer)
   (save-current-buffer
     (set-buffer (get-buffer-create buffer))
-    (set-billboard-header-line)
-    (set-billboard-major-mode)
+    (set-billboard-header-line) ;the derived mode will create a header useing the comlun names
+    (set-billboard-major-mode) ; this will need to use a 'define-derived-mode' specifying 'tabulated-list-mode'
     (insert "This is a line of text in this buffer"))
   (switch-to-buffer buffer))
 
@@ -50,10 +50,6 @@
 	(center-header-line-text
 	 (concat (propertize "Billboard: " 'face 'success)
 		 (propertize "Keep track of Brushy Creek announcmnets" 'face 'success)))))
-		
-(defun set-billboard-major-mode ()
-  ())
-
 
 ;; For testing 
 (defun clear-vars ()
