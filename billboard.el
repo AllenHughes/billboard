@@ -36,20 +36,31 @@
     (concat (build-spaces (- (/ line-length 2) (/ str-length 2)))
 	    str)))
 
-;; Create Announcment list buffer
-(defun create-billboard-list-buffer (buffer)
-  (save-current-buffer
-    (set-buffer (get-buffer-create buffer))
-    (set-billboard-header-line) ;the derived mode will create a header useing the comlun names
-    (set-billboard-major-mode) ; this will need to use a 'define-derived-mode' specifying 'tabulated-list-mode'
-    (insert "This is a line of text in this buffer"))
-  (switch-to-buffer buffer))
-
 (defun set-billboard-header-line ()
   (setf header-line-format
 	(center-header-line-text
 	 (concat (propertize "Billboard: " 'face 'success)
 		 (propertize "Keep track of Brushy Creek announcmnets" 'face 'success)))))
+
+
+(define-derived-mode billboard-list-mode
+  tablulated-list-mode "Billboard List"
+  "Major mode for displaying a list of announcments"
+
+  (setq tabulated-list-format
+	[("Title" 30 nil)
+	 ("Deadline" 12 t)
+	 ("Contact" 20 t)
+	 ("Notes" 5 t)
+	 ("Description" 40 nil)]))
+
+(defun billboard-list ()
+  "Create buffer for list and change major mode"
+  (save-current-buffer
+    (set-buffer (get-buffer-create "*Annoucements*"))
+    (billboard-list-mode)
+    (tabulated-list-print)
+    (switch-to-buffer "*Announcements*")))
 
 ;; For testing 
 (defun clear-vars ()
