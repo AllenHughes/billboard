@@ -24,7 +24,6 @@
       (if (equal? contact (cdr (assoc 'contact annoucement)))
 	  (push annoucement results)))))
 
-
 (defun build-spaces (num)
   (cond
    ((= 0 num) "")
@@ -36,6 +35,7 @@
     (concat (build-spaces (- (/ line-length 2) (/ str-length 2)))
 	    str)))
 
+;; Header line for main Billboard buffer
 (defun set-billboard-header-line ()
   (setf header-line-format
 	(center-header-line-text
@@ -44,7 +44,7 @@
 
 
 (define-derived-mode billboard-list-mode
-  tablulated-list-mode "Billboard List"
+  tabulated-list-mode "Billboard List"
   "Major mode for displaying a list of announcments"
 
   (setq tabulated-list-format
@@ -54,8 +54,10 @@
 	 ("Notes" 5 t)
 	 ("Description" 40 nil)]))
 
+;; This is the actual command to create the list buffer
 (defun billboard-list ()
   "Create buffer for list and change major mode"
+  (interactive)
   (save-current-buffer
     (set-buffer (get-buffer-create "*Annoucements*"))
     (billboard-list-mode)
