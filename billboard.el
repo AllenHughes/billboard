@@ -52,34 +52,33 @@
 	 ("Deadline" 12 t)
 	 ("Contact" 20 t)
 	 ("Notes" 5 t)
-	 ("Description" 40 nil)]))
+	 ("Description" 40 nil)])
+  (tabulated-list-init-header))
 
 ;; This is the actual command to create the list buffer
 (defun billboard-list ()
   "Create buffer for list and change major mode"
   (interactive)
-  (save-current-buffer
-    (set-buffer (get-buffer-create "*Annoucements*"))
-    (billboard-list-mode)
-    (tabulated-list-print)
-    (switch-to-buffer "*Announcements*")))
+  (let ((new-buffer (get-buffer-create "*Annoucements*")))
+    (save-current-buffer
+      (set-buffer new-buffer)
+      (billboard-list-mode)
+      (tabulated-list-print)
+      (switch-to-buffer new-buffer))))
 
 ;; For testing 
 (defun clear-vars ()
   (makunbound '*announcements*))
 
-
-
-
-;; (((contact . "Allen Hughes")
-;;   (title . "Another thing")
-;;   (deadline . "2017-08-20")
-;;   (description . "Stuff and things")
-;;   (notes . "Nothing"))
-;;  ((contact . "Pattsy Wilson")
-;;   (title . "Wedding Shower for Allen and Haleigh")
-;;   (deadline . "2017-07-16")
-;;   (description . "What is says")
-;;   (notes . "noNotes")))
-
-
+(defun reload-announcements ()
+    (setq *announcements*
+	  (((contact . "Allen Hughes")
+	    (title . "Another thing")
+	    (deadline . "2017-08-20")
+	    (description . "Stuff and things")
+	    (notes . "Nothing"))
+	   ((contact . "Pattsy Wilson")
+	    (title . "Wedding Shower for Allen and Haleigh")
+	    (deadline . "2017-07-16")
+	    (description . "What is says")
+	    (notes . "noNotes")))))
