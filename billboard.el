@@ -24,23 +24,24 @@
       (if (equal? contact (cdr (assoc 'contact annoucement)))
 	  (push annoucement results)))))
 
-(defun build-spaces (num)
-  (cond
-   ((= 0 num) "")
-   (t (concat " " (build-spaces (- num 1))))))
-
-(defun center-header-line-text (str)
-  (let ((line-length (window-width))
-	(str-length (length str)))
-    (concat (build-spaces (- (/ line-length 2) (/ str-length 2)))
-	    str)))
-
 ;; Header line for main Billboard buffer
 (defun set-billboard-header-line ()
   (setf header-line-format
 	(center-header-line-text
 	 (concat (propertize "Billboard: " 'face 'success)
 		 (propertize "Keep track of Brushy Creek announcmnets" 'face 'success)))))
+
+;;;
+;; Billboard-list-mode
+;;;
+
+(defvar billboard-list-mode-map
+  (let ((map (make-sparse-keymap)))
+    (set-keymap-parent map tabulated-list-mode-map)
+    (define-key map (kbd "N") 'prompt-new-announcement)
+    (define-key map (kbd "a") 'billboard-list-mark-archive)
+    (define-key map (kbd "u") 'billboard-list-unmark)
+    map))
 
 (defun announcement-list-entries ()
   "This function is used build a list of entries
@@ -73,14 +74,6 @@ differnt datastore"
 			    notes))
 	      entries)))
     (setq tabulated-list-entries entries)))
-
-(defvar billboard-list-mode-map
-  (let ((map (make-sparse-keymap)))
-    (set-keymap-parent map tabulated-list-mode-map)
-    (define-key map (kbd "N") 'prompt-new-announcement)
-    (define-key map (kbd "a") 'billboard-list-mark-archive)
-    (define-key map (kbd "u") 'billboard-list-unmark)
-    map))
 
 (defun billboard-list-unmark ()
   "remove the action mark from the first col of the row"
@@ -140,9 +133,9 @@ differnt datastore"
       (switch-to-buffer new-buffer))))
 
 ;; For testing 
-(defun clear-vars ()
+(defun null-vars ()
   (interactive)
-  (makunbound '*announcements*))
+  (setq *announcements* nil))
 
 (setq *announcements*
       '(((id . 20170720574A)
@@ -173,3 +166,18 @@ differnt datastore"
 	 (priority . "LOW")
 	 (description . "A thing were the yall get together and knit")
 	 (notes . nil))))
+
+;;;
+;; Utility
+;;;
+
+(defun build-spaces (num)
+  (cond
+   ((= 0 num) "")
+   (t (concat " " (build-spaces (- num 1))))))
+
+(defun center-header-line-text (str)
+  (let ((line-length (window-width))
+	(str-length (length str)))
+    (concat (build-spaces (- (/ line-length 2) (/ str-length 2)))
+	    str)))
