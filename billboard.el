@@ -78,11 +78,38 @@ differnt datastore"
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map tabulated-list-mode-map)
     (define-key map (kbd "N") 'prompt-new-announcement)
+    (define-key map (kbd "a") 'billboard-list-mark-archive)
+    (define-key map (kbd "u") 'billboard-list-unmark)
     map))
 
-(defun billboard-list-execute ()
+(defun billboard-list-unmark ()
+  "remove the action mark from the first col of the row"
   (interactive)
-  (
+  (when (tabulated-list-get-entry)
+    (tabulated-list-set-col 0 " " t)))
+
+(defun billboard-list-mark-archive ()
+  "mark the entry for archive"
+  (interactive)
+  (when (tabulated-list-get-entry)
+    (tabulated-list-set-col 0 "A" t)))
+
+(defun billboard-list-execute ()
+  "execute all marks on the marked entries"
+  (interactive)
+  (save-excursion
+    (list-beginning)
+    (while (not (eobp))
+      (let ((id (tabulated-list-get-id))
+	    (entry (tabulated-list-get-entry)))
+	(cond ((null entry) (forward-line 1))
+	      ((equal (aref entry 0) "A")
+	       ;;Archive entry
+	       (tabulated-list-set-col 0 " " t))
+	      ((equal (aref entry 0) "D")
+	       ;;Delete entry
+	       (tabulated-list-delete-entry))))))
+  (tabulated-list-revert))
 
 (define-derived-mode billboard-list-mode
   tabulated-list-mode "Billboard List"
