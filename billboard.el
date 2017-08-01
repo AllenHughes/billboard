@@ -51,29 +51,28 @@ global variable '*announcements', but it might be useful at some point to
 differnt datastore"
   (let (entries)
     (dolist (anncmnt *announcements*)
-      (let* ((id (cdr (assoc 'id anncmnt)))
-	     (title (cdr (assoc 'title anncmnt)))
-	     (deadline (cdr (assoc 'deadline anncmnt)))
-	     (contact (cdr (assoc 'contact anncmnt)))
-	     (notes (if (eq (cdr (assoc 'notes anncmnt)) nil)
-			" "
-		      "Y"))
-	     (priority (let ((value (cdr (assoc 'priority anncmnt))))
-			 (cond
-			  ((equal value nil) " ")
-			  ((equal value "LOW") "Low")
-			  ((equal value "MED") (propertize "Med" 'face 'warning))
-			  ((equal value "HIGH") (propertize "High" 'face 'error))
-			  (t "t")))))
-	     (push (list id
-			 (vector " "
-				 title
-				 deadline
-				 contact
-				 notes
-				 priority)))
-		   entries)))
-      (setq tabulated-list-entries entries))
+      (let ((id (cdr (assoc 'id anncmnt)))
+	    (priority (let ((value (cdr (assoc 'priority anncmnt))))
+			(cond
+			 ((equal value "LOW") "Low")
+			 ((equal value "MED") (propertize "Med" 'face 'warning))
+			 ((equal value "HIGH") (propertize "High" 'face 'error))
+			 (t " "))))
+	    (title (cdr (assoc 'title anncmnt)))
+	    (deadline (cdr (assoc 'deadline anncmnt)))
+	    (contact (cdr (assoc 'contact anncmnt)))
+	    (notes (if (eq (cdr (assoc 'notes anncmnt)) nil)
+		       " "
+		     "  Y  ")))
+	(push (list id
+		    (vector " "
+			    priority			    
+			    title
+			    deadline
+			    contact
+			    notes))
+	      entries)))
+    (setq tabulated-list-entries entries)))
 
 (defvar billboard-list-mode-map
   (let ((map (make-sparse-keymap)))
@@ -81,17 +80,21 @@ differnt datastore"
     (define-key map (kbd "N") 'prompt-new-announcement)
     map))
 
+(defun billboard-list-execute ()
+  (interactive)
+  (
+
 (define-derived-mode billboard-list-mode
   tabulated-list-mode "Billboard List"
   "Major mode for displaying a list of announcments"
 
   (setq tabulated-list-format
 	[(" " 1 nil)
+	 (" " 6 t)
 	 ("Title" 30 nil)
 	 ("Deadline" 12 t)
 	 ("Contact" 20 t)
-	 ("Notes" 5 t)
-	 ("Priority" 10 t)])
+	 ("Notes" 5 t)])
   (use-local-map billboard-list-mode-map)
   (add-hook 'tabulated-list-revert-hook 'announcement-list-entries nil t)
   (tabulated-list-init-header))
@@ -104,6 +107,7 @@ differnt datastore"
     (save-current-buffer
       (set-buffer new-buffer)
       (billboard-list-mode)
+      (hl-line-mode)
       (announcement-list-entries)
       (tabulated-list-print)
       (switch-to-buffer new-buffer))))
@@ -119,7 +123,7 @@ differnt datastore"
 	 (title . "Another thing")
 	 (deadline . "2017-08-20")
 	 (description . "Stuff and things")
-	 (priority . "HIGH")
+	 (priority . "LOW")
 	 (notes . "Nothing"))
 	((id . 20170723584B)
 	 (contact . "Pattsy Wilson")
