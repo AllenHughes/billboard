@@ -10,9 +10,11 @@
 
 (setq billboard-announcements-file "~/repos/billboard/announcements.billboard")
 
-(defun billboard-read-file
+(defun billboard-read-file ()
     (with-temp-buffer
-      (insert-file-contents-literally billboard-announcements-file)))
+      (insert-file-contents-literally billboard-announcements-file)
+      (eval-buffer)))
+
 ;;;
 ;; Billboard commands
 ;;;

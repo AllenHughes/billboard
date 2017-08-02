@@ -1,5 +1,5 @@
 (setq *announcements*
-      '(((id . 20170720574A)
+      '(((id . This-Is-Evedence-that-this-is-working)
 	 (contact . "Allen Hughes")
 	 (title . "Another thing")
 	 (deadline . "2017-08-20")
