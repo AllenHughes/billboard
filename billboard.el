@@ -1,6 +1,22 @@
 (defvar *announcements* nil
   "The main store for all announcemnets.")
 
+;;;
+;; handle file
+;;;
+
+(defvar billboard-announcements-flie nil
+  "The file to store announcements") ;TODO: may want to have this set in the .emacs
+
+(setq billboard-announcements-file "~/repos/billboard/announcements.billboard")
+
+(defun billboard-read-file
+    (with-temp-buffer
+      (insert-file-contents-literally billboard-announcements-file)))
+;;;
+;; Billboard commands
+;;;
+
 (defun make-announcement (ti co dl de no pr)
   "Create an announcemnet alist"
   (list (cons 'contact co)
