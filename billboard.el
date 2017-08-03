@@ -1,4 +1,4 @@
-(defvar *announcements* nil
+(defvar *announcements* ()
   "The main store for all announcemnets.")
 
 ;;;
@@ -6,14 +6,26 @@
 ;;;
 
 (defvar billboard-announcements-flie nil
-  "The file to store announcements") ;TODO: may want to have this set in the .emacs
+  "The file to store announcements")
 
+;; TODO: may want to have this set in the .emacs
 (setq billboard-announcements-file "~/repos/billboard/announcements.billboard")
 
+;; TODO: This should not be a final solution. Need to do something that isn't such a
+;; security risk.
 (defun billboard-read-file ()
-    (with-temp-buffer
-      (insert-file-contents-literally billboard-announcements-file)
-      (eval-buffer)))
+  (with-temp-buffer
+    (insert "(setq *announcements*")
+    (forward-line 1)
+    (insert "'")
+    (insert-file-contents-literally billboard-announcements-file)
+    (goto-char (point-max))
+    (insert ")")
+    (eval-buffer)))
+
+(defun billboard-write-file ()
+  (with-temp-file billboard-announcements-file
+    (insert (prin1-to-string *announcements*))))
 
 ;;;
 ;; Billboard commands
