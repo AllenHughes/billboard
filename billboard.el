@@ -2,30 +2,27 @@
   "The main store for all announcemnets.")
 
 ;;;
-;; handle file
+;; Handle file
 ;;;
 
 (defvar billboard-announcements-flie nil
   "The file to store announcements")
 
-;; TODO: may want to have this set in the .emacs
-(setq billboard-announcements-file "~/repos/billboard/announcements.billboard")
+;; TODO: may want to have this set by user in .emacs
+;;(setq billboard-announcements-file "~/repos/billboard/announcements.billboard")
+(setq billboard-announcements-file "c:/Users/AllenWorkstation/Repos/billboard/announcements.billboard")
 
-;; TODO: This should not be a final solution. Need to do something that isn't such a
-;; security risk.
-(defun billboard-read-file ()
-  (with-temp-buffer
-    (insert "(setq *announcements*")
-    (forward-line 1)
-    (insert "'")
-    (insert-file-contents-literally billboard-announcements-file)
-    (goto-char (point-max))
-    (insert ")")
-    (eval-buffer)))
+;; TODO: This should not be a final solution.		
+(defun billboard-read-file () 
+  (setq *announcements*
+	(with-temp-buffer
+	  (insert-file-contents billboard-announcements-file)
+	  (let ((text (read (buffer-string))))
+	    (if (listp text) text ())))))
 
 (defun billboard-write-file ()
   (with-temp-file billboard-announcements-file
-    (insert (prin1-to-string *announcements*)))) ; This prints the whole list. 
+    (prin1 *announcements* (current-buffer))))
 
 ;;;
 ;; Billboard commands
@@ -40,7 +37,9 @@
 	(cons 'notes no)
 	(cons 'priority pr)))
 
-(defun add-announcement (announcement) (push announcement *announcements*))
+(defun add-announcement (announcement)
+  (push announcement *announcements*)
+  (billboard-write-file))
 
 (defun prompt-new-announcement (ti co dl de no pr)
   "Interactively get the values for a new announcement and add to db."
@@ -70,6 +69,7 @@
     (set-keymap-parent map tabulated-list-mode-map)
     (define-key map (kbd "N") 'prompt-new-announcement)
     (define-key map (kbd "a") 'billboard-list-mark-archive)
+    (define-key map (kbd "d") 'billboard-list-mark-delete)
     (define-key map (kbd "u") 'billboard-list-unmark)
     map))
 
@@ -80,29 +80,32 @@ It creates a list of list of list, each having an id for the first element
 and a vector of objects for the second element. It currently uses the 
 global variable '*announcements', but it might be useful at some point to
 differnt datastore"
+
+;; TODO: Read from file
   (let (entries)
-    (dolist (anncmnt *announcements*)
-      (let ((id (cdr (assoc 'id anncmnt)))
-	    (priority (let ((value (cdr (assoc 'priority anncmnt))))
-			(cond
-			 ((equal value "LOW") "Low")
-			 ((equal value "MED") (propertize "Med" 'face 'warning))
-			 ((equal value "HIGH") (propertize "High" 'face 'error))
-			 (t " "))))
-	    (title (cdr (assoc 'title anncmnt)))
-	    (deadline (cdr (assoc 'deadline anncmnt)))
-	    (contact (cdr (assoc 'contact anncmnt)))
-	    (notes (if (eq (cdr (assoc 'notes anncmnt)) nil)
-		       " "
-		     "  Y  ")))
-	(push (list id
-		    (vector " "
-			    priority			    
-			    title
-			    deadline
-			    contact
-			    notes))
-	      entries)))
+    (if (eq *announcements* "") (setq entries ())
+      (dolist (anncmnt *announcements*)
+	(let ((id (cdr (assoc 'id anncmnt)))
+	      (priority (let ((value (cdr (assoc 'priority anncmnt))))
+			  (cond
+			   ((equal value "LOW") "Low")
+			   ((equal value "MED") (propertize "Med" 'face 'warning))
+			   ((equal value "HIGH") (propertize "High" 'face 'error))
+			   (t " "))))
+	      (title (cdr (assoc 'title anncmnt)))
+	      (deadline (cdr (assoc 'deadline anncmnt)))
+	      (contact (cdr (assoc 'contact anncmnt)))
+	      (notes (if (eq (cdr (assoc 'notes anncmnt)) nil)
+			 " "
+		       "  Y  ")))
+	  (push (list id
+		      (vector " "
+			      priority			    
+			      title
+			      deadline
+			      contact
+			      notes))
+		entries))))
     (setq tabulated-list-entries entries)))
 
 (defun billboard-list-unmark ()
@@ -116,6 +119,12 @@ differnt datastore"
   (interactive)
   (when (tabulated-list-get-entry)
     (tabulated-list-set-col 0 "A" t)))
+
+(defun billboard-list-mark-delete ()
+  "mark the entry for delete"
+  (interactive)
+  (when (tabulated-list-get-entry)
+    (tabulated-list-set-col 0 "D" t)))
 
 (defun billboard-list-execute ()
   "execute all marks on the marked entries"
@@ -137,7 +146,7 @@ differnt datastore"
 (define-derived-mode billboard-list-mode
   tabulated-list-mode "Billboard List"
   "Major mode for displaying a list of announcments"
-
+  (billboard-read-file)
   (setq tabulated-list-format
 	[(" " 1 nil)
 	 (" " 6 t)
@@ -167,7 +176,8 @@ differnt datastore"
   (interactive)
   (setq *announcements* nil))
 
-(setq *announcements*
+(defun set-db ()
+    (setq *announcements*
       '(((id . 20170720574A)
 	 (contact . "Allen Hughes")
 	 (title . "Another thing")
@@ -195,7 +205,7 @@ differnt datastore"
 	 (deadline . "2017-10-23")
 	 (priority . "LOW")
 	 (description . "A thing were the yall get together and knit")
-	 (notes . nil))))
+	 (notes . nil)))))
 
 ;;;
 ;; Utility
