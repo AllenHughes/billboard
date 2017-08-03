@@ -25,7 +25,7 @@
 
 (defun billboard-write-file ()
   (with-temp-file billboard-announcements-file
-    (insert (prin1-to-string *announcements*))))
+    (insert (prin1-to-string *announcements*)))) ; This prints the whole list. 
 
 ;;;
 ;; Billboard commands
