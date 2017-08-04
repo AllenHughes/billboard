@@ -12,8 +12,9 @@
 ;;(setq billboard-announcements-file "~/repos/billboard/announcements.billboard")
 (setq billboard-announcements-file "c:/Users/AllenWorkstation/Repos/billboard/announcements.billboard")
 
-;; TODO: This should not be a final solution.		
+
 (defun billboard-read-file () 
+;; TODO: This should not be a final solution.
   (setq *announcements*
 	(with-temp-buffer
 	  (insert-file-contents billboard-announcements-file)
