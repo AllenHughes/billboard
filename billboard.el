@@ -109,6 +109,8 @@ differnt datastore"
 		entries))))
     (setq tabulated-list-entries entries)))
 
+;;Mode functions
+
 (defun billboard-list-unmark ()
   "remove the action mark from the first col of the row"
   (interactive)
@@ -172,7 +174,25 @@ differnt datastore"
       (tabulated-list-print)
       (switch-to-buffer new-buffer))))
 
+;;;
+;; Upcoming Bulletin View
+;; TODO:
+;;;
+
+;; Find Sundays from now until 'time'
+;; -> (sunday-1 sunday-2 sunday-3)
+
+;; Build list of announcements for each week
+;; -> ((sunday-1 (announcment-id-1 announcment-id-2))
+;;     (sunday-2 (announcment-id-1 announcment-id-2)))
+;;     (sunday-3 (announcment-id-1 announcment-id-2)))
+
+;; Display list for each week in a buffer ex. "upcoming-bulletins-ui-sketch"
+
+;;;
 ;; For testing 
+;;;
+
 (defun null-vars ()
   (interactive)
   (setq *announcements* nil))
