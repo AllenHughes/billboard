@@ -18,8 +18,10 @@
   (setq *announcements*
 	(with-temp-buffer
 	  (insert-file-contents billboard-announcements-file)
-	  (let ((text (read (buffer-string))))
-	    (if (listp text) text ())))))
+	  (let ((text (condition-case nil
+			  (read (buffer-string))
+			(error ()))))
+	    text))))
 
 (defun billboard-write-file ()
   (with-temp-file billboard-announcements-file
@@ -149,7 +151,6 @@ differnt datastore"
 (define-derived-mode billboard-list-mode
   tabulated-list-mode "Billboard List"
   "Major mode for displaying a list of announcments"
-  (billboard-read-file)
   (setq tabulated-list-format
 	[(" " 1 nil)
 	 (" " 6 t)
