@@ -18,10 +18,10 @@
   (setq *announcements*
 	(with-temp-buffer
 	  (insert-file-contents billboard-announcements-file)
-	  (let ((text (condition-case nil
+	  (let ((value (condition-case nil
 			  (read (buffer-string))
 			(error ()))))
-	    text))))
+	    value))))
 
 (defun billboard-write-file ()
   (with-temp-file billboard-announcements-file
@@ -33,12 +33,15 @@
 
 (defun make-announcement (ti co dl de no pr)
   "Create an announcemnet alist"
-  (list (cons 'contact co)
-	(cons 'title ti)
-	(cons 'deadline dl)
-	(cons 'description de)
-	(cons 'notes no)
-	(cons 'priority pr)))
+  (list
+   (cons 'id (~random-id-string))
+   (cons 'created (list (current-time)))
+   (cons 'contact co)
+   (cons 'title ti)
+   (cons 'deadline (cons dl()))
+   (cons 'description de)
+   (cons 'notes no)
+   (cons 'priority pr)))
 
 (defun add-announcement (announcement)
   (push announcement *announcements*)
@@ -46,8 +49,39 @@
 
 (defun prompt-new-announcement (ti co dl de no pr)
   "Interactively get the values for a new announcement and add to db."
-  (interactive "MTitle: \nMContact: \nMDealine: \nMDescription: \nMNotes: \nMPriority: ")
+  (interactive
+   (list
+    (read-string "Title: ")
+    (read-string "Contact: ")
+    (call-interactively 'prompt-deadline)
+    (call-interactively 'prompt-description)
+    (call-interactively 'prompt-notes)
+    (completing-read "Priority: " '("HIGH" "MED" "LOW"))))
   (add-announcement (make-announcement ti co dl de no pr)))
+
+(defun prompt-deadline (arg)
+  (interactive
+   (list
+    (apply #'encode-time (parse-time-string (concat (read-string "Deadline: ") " 00:00:00")))))
+  arg)
+
+(defun prompt-description (arg)
+  (interactive
+   (list
+    (read-string "Descripation: ")))
+  arg)
+
+(defun prompt-notes (arg)
+  (interactive
+   (list
+    (read-string "Notes: ")))
+  arg)
+
+;; (defun prompt-new-announcement (ti co dl de no pr)
+;;   "Interactively get the values for a new announcement and add to db."
+;;   (interactive "MTitle: \nMContact: \nMDealine: \nMDescription: \nMNotes: \nMPriority: ")
+;;   (add-announcement (make-announcement ti co dl de no pr)))
+
 
 (defun find-by-contact (contact)
   "Finds all records that have the value of contact in its 'contact association"
@@ -84,9 +118,9 @@ and a vector of objects for the second element. It currently uses the
 global variable '*announcements', but it might be useful at some point to
 differnt datastore"
 
-;; TODO: Read from file
+  ;; TODO: Read from file
   (let (entries)
-    (if (eq *announcements* "") (setq entries ())
+    (if (eq *announcements* nil) (setq entries ())
       (dolist (anncmnt *announcements*)
 	(let ((id (cdr (assoc 'id anncmnt)))
 	      (priority (let ((value (cdr (assoc 'priority anncmnt))))
@@ -96,7 +130,7 @@ differnt datastore"
 			   ((equal value "HIGH") (propertize "High" 'face 'error))
 			   (t " "))))
 	      (title (cdr (assoc 'title anncmnt)))
-	      (deadline (cdr (assoc 'deadline anncmnt)))
+	      (deadline (pretty-date (car (cdr (assoc 'deadline anncmnt)))))
 	      (contact (cdr (assoc 'contact anncmnt)))
 	      (notes (if (eq (cdr (assoc 'notes anncmnt)) nil)
 			 " "
@@ -171,6 +205,7 @@ differnt datastore"
       (set-buffer new-buffer)
       (billboard-list-mode)
       (hl-line-mode)
+      (billboard-read-file)
       (announcement-list-entries)
       (tabulated-list-print)
       (switch-to-buffer new-buffer))))
@@ -232,6 +267,18 @@ differnt datastore"
 ;;;
 ;; Utility
 ;;;
+
+(defun pretty-date (time)
+;;  (format "%s" time))
+  (let ((string (format-time-string "%e %B" time)))
+    string))
+
+(defun ~random-id-string ()
+  (md5 (format "%s%s%s%s"
+	       (user-uid)
+	       (current-time)
+	       (random)
+	       (recent-keys))))
 
 (defun build-spaces (num)
   (cond
