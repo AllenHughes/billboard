@@ -91,11 +91,11 @@
 	  (push annoucement results)))))
 
 ;; Header line for main Billboard buffer
-(defun set-billboard-header-line ()
-  (setf header-line-format
-	(center-header-line-text
-	 (concat (propertize "Billboard: " 'face 'success)
-		 (propertize "Keep track of Brushy Creek announcmnets" 'face 'success)))))
+;; (defun set-billboard-header-line ()
+;;   (setf header-line-format
+;; 	(center-header-line-text
+;; 	 (concat (propertize "Billboard: " 'face 'success)
+;; 		 (propertize "Keep track of Brushy Creek announcmnets" 'face 'success)))))
 
 ;;;
 ;; Billboard-list-mode
@@ -108,6 +108,7 @@
     (define-key map (kbd "a") 'billboard-list-mark-archive)
     (define-key map (kbd "d") 'billboard-list-mark-delete)
     (define-key map (kbd "u") 'billboard-list-unmark)
+    (define-key map (kbd "x") 'billboard-list-execute)
     map))
 
 (defun announcement-list-entries ()
@@ -132,9 +133,11 @@ differnt datastore"
 	      (title (cdr (assoc 'title anncmnt)))
 	      (deadline (pretty-date (car (cdr (assoc 'deadline anncmnt)))))
 	      (contact (cdr (assoc 'contact anncmnt)))
-	      (notes (if (eq (cdr (assoc 'notes anncmnt)) nil)
-			 " "
-		       "  Y  ")))
+	      ;; (notes (let ((cdr (assoc 'notes anncmnt)) note)
+	      ;; 	       (if (equal note "")
+	      ;; 		   "H "
+	      ;; 		 "  Y  "))))
+	      (notes (cdr
 	  (push (list id
 		      (vector " "
 			      priority			    
@@ -145,7 +148,7 @@ differnt datastore"
 		entries))))
     (setq tabulated-list-entries entries)))
 
-;;Mode functions
+;;list functions
 
 (defun billboard-list-unmark ()
   "remove the action mark from the first col of the row"
