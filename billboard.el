@@ -14,7 +14,7 @@
 
 
 (defun billboard-read-file () 
-;; TODO: This should not be a final solution.
+;; TODO: This probably should not be a final solution.
   (setq *announcements*
 	(with-temp-buffer
 	  (insert-file-contents billboard-announcements-file)
@@ -34,13 +34,15 @@
 (defun make-announcement (ti co dl de no pr)
   "Create an announcemnet alist"
   (list
-   (cons 'id (~random-id-string))
-   (cons 'created (list (current-time)))
+   (~random-id-string)
+   (cons 'created (current-time))
    (cons 'contact co)
    (cons 'title ti)
-   (cons 'deadline (cons dl()))
+   (cons 'deadline dl)
    (cons 'description de)
-   (cons 'notes no)
+   (if (null no)
+       (list 'notes)
+     (list 'notes no))
    (cons 'priority pr)))
 
 (defun add-announcement (announcement)
@@ -74,8 +76,19 @@
 (defun prompt-notes (arg)
   (interactive
    (list
-    (read-string "Notes: ")))
-  arg)
+    (read-string "Note: ")))
+  (if (equal arg "")
+      nil
+    (cons arg
+	  (current-time))))
+
+(defun add-notes (arg)
+  (interactive
+   (list
+    (call-interactively 'prompt-notes))
+   (if (equal arg "")
+       (message "No note added")
+     ((push arg (cdr (assoc 'notes (car cdr assoc (tabulated-list-get-id) *announcements*))))))))
 
 ;; (defun prompt-new-announcement (ti co dl de no pr)
 ;;   "Interactively get the values for a new announcement and add to db."
@@ -121,23 +134,24 @@ differnt datastore"
 
   ;; TODO: Read from file
   (let (entries)
-    (if (eq *announcements* nil) (setq entries ())
+    (if (eq *announcements* nil)
+	(setq entries ())
       (dolist (anncmnt *announcements*)
-	(let ((id (cdr (assoc 'id anncmnt)))
-	      (priority (let ((value (cdr (assoc 'priority anncmnt))))
+	(let ((id (car anncmnt))
+	      (priority (let ((value (cdr (assoc 'priority (cdr anncmnt)))))
 			  (cond
 			   ((equal value "LOW") "Low")
 			   ((equal value "MED") (propertize "Med" 'face 'warning))
 			   ((equal value "HIGH") (propertize "High" 'face 'error))
 			   (t " "))))
-	      (title (cdr (assoc 'title anncmnt)))
-	      (deadline (pretty-date (car (cdr (assoc 'deadline anncmnt)))))
-	      (contact (cdr (assoc 'contact anncmnt)))
-	      ;; (notes (let ((cdr (assoc 'notes anncmnt)) note)
-	      ;; 	       (if (equal note "")
-	      ;; 		   "H "
-	      ;; 		 "  Y  "))))
-	      (notes (cdr
+	      (title (cdr (assoc 'title (cdr anncmnt))))
+	      (deadline (pretty-date (cdr (assoc 'deadline (cdr anncmnt)))))
+	      (contact (cdr (assoc 'contact (cdr anncmnt))))
+	      (notes (let ((car (cdr (assoc 'notes (cdr anncmnt)))) note)
+	      	       (if (null note)
+	      		   (message (prin1-to-string note))
+	      		 note))))
+	      ;; (notes (car (cdr (assoc 'notes (cdr anncmnt))))))
 	  (push (list id
 		      (vector " "
 			      priority			    
