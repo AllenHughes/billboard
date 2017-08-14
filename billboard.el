@@ -205,7 +205,8 @@ differnt datastore"
   	      ((equal (aref entry 0) "D")
   	       (setq *announcements*(delete-announcement (tabulated-list-get-id) *announcements*))
   	       (tabulated-list-delete-entry)))
-	(forward-line 1)))))
+	(forward-line 1)))
+    (billboard-write-file)))
 
 (define-derived-mode billboard-list-mode
   tabulated-list-mode "Billboard List"
