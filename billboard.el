@@ -31,6 +31,14 @@
 ;; Billboard commands
 ;;;
 
+(defun delete-announcement (id-key announcement-store)
+  (cond
+   ((null announcement-store) '())
+   ((equal id-key (car (car announcement-store)))
+    (cdr announcement-store))
+   (t (cons (car announcement-store)
+	    (delete-announcement id-key (cdr announcement-store))))))
+
 (defun make-announcement (ti co dl de no pr)
   "Create an announcemnet alist"
   (list
@@ -186,18 +194,18 @@ differnt datastore"
   "execute all marks on the marked entries"
   (interactive)
   (save-excursion
-    (list-beginning)
+    (goto-char (point-min))
     (while (not (eobp))
       (let ((id (tabulated-list-get-id))
 	    (entry (tabulated-list-get-entry)))
 	(cond ((null entry) (forward-line 1))
 	      ((equal (aref entry 0) "A")
-	       ;;Archive entry
+	       (message "Archiving")
 	       (tabulated-list-set-col 0 " " t))
-	      ((equal (aref entry 0) "D")
-	       ;;Delete entry
-	       (tabulated-list-delete-entry))))))
-  (tabulated-list-revert))
+  	      ((equal (aref entry 0) "D")
+  	       (setq *announcements*(delete-announcement (tabulated-list-get-id) *announcements*))
+  	       (tabulated-list-delete-entry)))
+	(forward-line 1)))))
 
 (define-derived-mode billboard-list-mode
   tabulated-list-mode "Billboard List"
