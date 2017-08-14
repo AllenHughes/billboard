@@ -251,6 +251,38 @@ differnt datastore"
 
 ;; Display list for each week in a buffer ex. "upcoming-bulletins-ui-sketch"
 
+(defun billboard-upcoming (arg)
+  "Create a buffer to display each bulletin and its announcements untill a provided date"
+  (interactive
+   (list
+    (apply #'encode-time (parse-time-string (concat (read-string "Display every sunday until: ") " 00:00:00")))))
+  (let* ((sundays (find-sundays current-time arg))) ;'find-sundays' takes start-date and end-date and returns a list of dates for every sunday in that range.
+    (let (all-bulletins)
+      (dolist (sunday sundays all-bulletins)
+	(cons (build-bulletin sunday) all-bulletins))
+      (let ((new-buffer (get-buffer-create "*Upcoming Bulletins*")))
+	(set-buffer new-buffer)
+	(billboard-upcoming-mode)
+	(goto-char (point-min))
+	(billboard-bulltin-display all-bulletins)))))
+
+(defun find-sundays (start-time end-time)
+  (let ((date (if (eq (nth 6 (decode-time start-time)) 0)
+		  start-time
+		(encode-time 0 0 0
+			     (+ (+ (- 7 (nth 6 (decode-time start-time))) 0) (nth 3 (decode-time start-time)))
+			     (nth 4 (decode-time start-time))
+			     (nth 5 (decode-time start-time)))))
+	(end-date (find-privous-sunday end-time))
+	(sundays))
+    (while (<= date end-date)
+      (setq sundays (cons date sundays))
+      (setq date (encode 0 0 0
+			 (+ (nth 3 (decode-time date)) 7) ;set day of month to next sunday
+			 (nth 4 (decode-time date)) ;set month to the month of date
+			 (nth 5 (decode-time date))))) ;set year to the year of date
+    (reverse sundays)))
+
 ;;;
 ;; For testing 
 ;;;
