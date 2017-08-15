@@ -265,6 +265,18 @@ differnt datastore"
 	(billboard-bulletins-display bulletins) ;TODO: billboard-bulletins-display
 	(switch-to-buffer new-buffer))))
 
+(defun build-bulletins (sundays) ;TODO: This is a big mess that may not do anything
+  "Build a lists of lists of a time as car and a list of ids for the cdr"
+  (let ((announcements *announcements*))
+    (cl-labels ((build-bulletin (time announcement-list)
+				(cond ((null announcements) '())
+				      ((>= (time-to-seconds time) (time-to-seconds (cdr (assoc (cdr (car announcement-list))))))
+				       (cons (car (car announcements-list)) (build-bulletin time (cdr announcement-list))))
+				      (t (build-bulletin time (cdr announcement-list))))))
+      (mapcar (lambda (time)
+		(cons time (funcall #'build-bulletin time announcements)))
+	      sundays)))
+
 (defun find-sundays (start-time end-time)
   ;TODO: Should probaly do something about all the 'decode-time'that I use in this.
   "Takes start-date and end-date and returns a list of dates for every sunday in that range."
@@ -336,6 +348,15 @@ differnt datastore"
 ;;  (format "%s" time))
   (let ((string (format-time-string "%e %B" time)))
     string))
+
+(defun print-decoded (list)
+    (cond
+     ((null (car list)) '())
+     (t (cons (decode-time (car list))
+	      (print-decoded (cdr list))))))
+
+(let ((list (find-sundays (current-time) (apply #'encode-time (parse-time-string "2017-09-20 00:00:00")))))
+  (print-decoded list))
 
 (defun ~random-id-string ()
   (md5 (format "%s%s%s%s"
