@@ -265,17 +265,18 @@ differnt datastore"
 	(billboard-bulletins-display bulletins) ;TODO: billboard-bulletins-display
 	(switch-to-buffer new-buffer))))
 
-(defun build-bulletins (sundays) ;TODO: This is a big mess that may not do anything
+(defun build-bulletins (sundays) 
   "Build a lists of lists of a time as car and a list of ids for the cdr"
   (let ((announcements *announcements*))
-    (cl-labels ((build-bulletin (time announcement-list)
-				(cond ((null announcements) '())
-				      ((>= (time-to-seconds time) (time-to-seconds (cdr (assoc (cdr (car announcement-list))))))
-				       (cons (car (car announcements-list)) (build-bulletin time (cdr announcement-list))))
-				      (t (build-bulletin time (cdr announcement-list))))))
       (mapcar (lambda (time)
 		(cons time (funcall #'build-bulletin time announcements)))
 	      sundays)))
+
+(defun build-bulletin (time announcement-list)
+			    (cond ((null announcement-list) '())
+				  ((>= (time-to-seconds time) (time-to-seconds (cdr (assoc 'deadline (cdr (car announcement-list))))))
+				   (cons (car (car announcement-list)) (build-bulletin time (cdr announcement-list))))
+				  (t (build-bulletin time (cdr announcement-list)))))
 
 (defun find-sundays (start-time end-time)
   ;TODO: Should probaly do something about all the 'decode-time'that I use in this.
@@ -357,6 +358,10 @@ differnt datastore"
 
 (let ((list (find-sundays (current-time) (apply #'encode-time (parse-time-string "2017-09-20 00:00:00")))))
   (print-decoded list))
+
+;; (progn
+;;  (forward-line 1)
+;;  (insert (prin1-to-string (build-bulletins (find-sundays (current-time) (apply #'encode-time (parse-time-string (concat (read-string "Display every sunday until: ") " 00:00:00"))))
 
 (defun ~random-id-string ()
   (md5 (format "%s%s%s%s"
