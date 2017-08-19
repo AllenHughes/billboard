@@ -9,8 +9,8 @@
   "The file to store announcements")
 
 ;; TODO: may want to have this set by user in .emacs
-;;(setq billboard-announcements-file "~/repos/billboard/announcements.billboard")
-(setq billboard-announcements-file "c:/Users/AllenWorkstation/Repos/billboard/announcements.billboard")
+(setq billboard-announcements-file "~/repos/billboard/announcements.billboard")
+;; (setq billboard-announcements-file "c:/Users/AllenWorkstation/Repos/billboard/announcements.billboard")
 
 
 (defun billboard-read-file () 
@@ -259,11 +259,38 @@ differnt datastore"
     (let ((new-buffer (get-buffer-create "*Upcoming Bulletins*")))
       (save-current-buffer
 	(set-buffer new-buffer)
-	(setq-local bulletins (build-bulletins (find-sundays (current-time) arg))) ;TODO: build-bulletins
-	(billboard-upcoming-mode) ;TODO: billboard-upcoming-mode
+	(setq-local bulletins (build-bulletins (find-sundays (current-time) arg)))
+	;; (billboard-upcoming-mode) ;TODO: billboard-upcoming-mode
 	(goto-char (point-min))
 	(billboard-bulletins-display bulletins) ;TODO: billboard-bulletins-display
 	(switch-to-buffer new-buffer))))
+
+(defun billboard-bulletins-display (bulletins)
+  (mapcar (lambda (bulletin)
+					; Bulletin
+	    (insert (center-line-text-with (pretty-date (car bulletin)) "="))
+	    (newline 2)
+					; Bulletin Announcements
+	    (if (null (cdr bulletin))
+		(progn
+		  (insert (center-line-text-with "--NO ANNOUNCEMENTS--" nil (unless (> (window-width) 80) 80)))
+		  (newline))
+	      (mapcar (lambda (id) 
+			(let ((announcement (assoc id *announcements*)))
+			  (insert (build-char 9)
+				  "> "
+				  (cdr (assoc 'title announcement))
+				  " - "
+				  (cdr (assoc 'priority announcement))
+				  " - "
+				  (format-time-string "%F" (cdr (assoc 'deadline announcement)))
+				  " - "
+				  (cdr (assoc 'contact announcement)))
+			  (newline)))
+		      (cdr bulletin)))
+					; Back to Bulletin
+	    (newline))
+	  bulletins))
 
 (defun build-bulletins (sundays) 
   "Build a lists of lists of a time as car and a list of ids for the cdr"
@@ -274,7 +301,7 @@ differnt datastore"
 
 (defun build-bulletin (time announcement-list)
 			    (cond ((null announcement-list) '())
-				  ((>= (time-to-seconds time) (time-to-seconds (cdr (assoc 'deadline (cdr (car announcement-list))))))
+				  ((<= (time-to-seconds time) (time-to-seconds (cdr (assoc 'deadline (cdr (car announcement-list))))))
 				   (cons (car (car announcement-list)) (build-bulletin time (cdr announcement-list))))
 				  (t (build-bulletin time (cdr announcement-list)))))
 
@@ -356,8 +383,8 @@ differnt datastore"
      (t (cons (decode-time (car list))
 	      (print-decoded (cdr list))))))
 
-(let ((list (find-sundays (current-time) (apply #'encode-time (parse-time-string "2017-09-20 00:00:00")))))
-  (print-decoded list))
+;; (let ((list (find-sundays (current-time) (apply #'encode-time (parse-time-string "2017-09-20 00:00:00")))))
+;;   (print-decoded list))
 
 ;; (progn
 ;;  (forward-line 1)
@@ -370,13 +397,16 @@ differnt datastore"
 	       (random)
 	       (recent-keys))))
 
-(defun build-spaces (num)
-  (cond
-   ((= 0 num) "")
-   (t (concat " " (build-spaces (- num 1))))))
+(defun build-char (num &optional char)
+  (let ((char-to-use (if (null  char) " " char)))
+    (cond
+     ((= 0 num) char-to-use)
+     (t (concat char-to-use (build-char (- num 1) char-to-use))))))
 
-(defun center-header-line-text (str)
-  (let ((line-length (window-width))
-	(str-length (length str)))
-    (concat (build-spaces (- (/ line-length 2) (/ str-length 2)))
-	    str)))
+(defun center-line-text-with (str &optional char length)
+  (let ((line-length (if length length (window-width)))
+	(str-length (length str))
+	(char-to-use (if char char " ")))
+    (concat (build-char (- (/ line-length 2) (/ str-length 2)) char-to-use)
+	    (concat str (build-char (- (/ line-length 2) (/ str-length 2)) char-to-use)))))
+
