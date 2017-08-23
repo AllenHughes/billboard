@@ -9,8 +9,8 @@
   "The file to store announcements")
 
 ;; TODO: may want to have this set by user in .emacs
-(setq billboard-announcements-file "~/repos/billboard/announcements.billboard")
-;; (setq billboard-announcements-file "c:/Users/AllenWorkstation/Repos/billboard/announcements.billboard")
+;;(setq billboard-announcements-file "~/repos/billboard/announcements.billboard")
+(setq billboard-announcements-file "c:/Users/AllenWorkstation/Repos/billboard/announcements.billboard")
 
 
 (defun billboard-read-file () 
@@ -208,8 +208,9 @@ differnt datastore"
 	(forward-line 1)))
     (billboard-write-file)))
 
-(define-derived-mode billboard-list-mode
-  tabulated-list-mode "Billboard List"
+;; TODO: Sorting the date column currently sorts the text of the column not the date it
+;; represents.
+(define-derived-mode billboard-list-mode tabulated-list-mode "Billboard List"
   "Major mode for displaying a list of announcments"
   (setq tabulated-list-format
 	[(" " 1 nil)
